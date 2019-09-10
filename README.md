@@ -1,7 +1,7 @@
-Experimental Code from misig Repository
+Xperimental Code from misig Repository
 ================
 Nathan (Nat) Goodman
-June 6, 2019
+September 6, 2019
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 Code and documents from [misig repository](https://github.com/natgoodman/misig) that aren't needed for posted blog posts or working papers, and that aren't likely to be used in posted material any time soon. This is basically a dusty attic for code and documents I'm not using but don't want to lose. Some of the code works and some is hopelessly broken. Sorry.
@@ -13,7 +13,7 @@ Comments Please!
 
 Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email <natg@shore.net>.
 
-Please report bugs, other software problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/misigExper/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
+Please report bugs, other software problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/misigXper/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
 
 Copyright & License
 -------------------

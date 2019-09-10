@@ -1,5 +1,5 @@
 ---
-title: "Experimental Code from misig Repository"
+title: "Xperimental Code from misig Repository"
 author: "Nathan (Nat) Goodman"
 date: "September 6, 2019"
 output:
@@ -23,7 +23,7 @@ Code and documents from [misig repository](https://github.com/natgoodman/misig) 
 
 Please post comments on [Twitter](https://twitter.com/gnatgoodman) or [Facebook](https://www.facebook.com/nathan.goodman.3367), or contact me by email [natg@shore.net](mailto:natg@shore.net). 
 
-Please report bugs, other software problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/misigExper/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
+Please report bugs, other software problems, and feature requests using the [GitHub Issue Tracker](https://github.com/natgoodman/misigXper/issues). I will be notified, and you'll be apprised of progress. As already noted, the software is still rough and software documentation nonexistent.
 
 ## Copyright & License
 
