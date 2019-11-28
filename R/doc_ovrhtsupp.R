@@ -326,11 +326,11 @@ plotqq_d2ht=
       sim=get_sim_hetd(n=n,d=d.het,sd=sd.het);
       y=quantile(sim$d.sdz,probs=p);
     } else {
-      qq=withrows(cases,case,{
+      qq=do.call(rbind,withrows(cases,case,{
         x=q_d2ht(n=n,d.het=d.het,sd.het=sd.het,p=p);
         sim=get_sim_hetd(n=n,d=d.het,sd=sd.het);
         y=quantile(sim$d.sdz,probs=p);
-        data.frame(x,y)});
+        data.frame(x,y)}));
       x=qq$x;
       y=qq$y;
       cex=cex.cases;
