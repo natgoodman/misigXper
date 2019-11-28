@@ -650,7 +650,7 @@ foo=function() {
 title_ovrhtsupp=function(...,sep=' ',n=NULL,d.het=NULL,sd.het=NULL) {
   fig=paste(sep='','Figure ',figlabel());
   desc=paste(sep=sep,...);
-  nv=nvq(sep=', ',ignore=T,n,d.het,sd.het);
+  nv=nvq(sep=', ',IGNORE=T,n,d.het,sd.het);
   if (!nzchar(nv)) nv=NULL;
   paste(collapse="\n",c(fig,paste(collapse='. ',c(desc,nv))));
 }
