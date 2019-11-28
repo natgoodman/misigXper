@@ -71,7 +71,7 @@ plotdvsd=
     vhline(vline=vline,hline=hline,vlab=vlab,hlab=hlab,vhdigits=vhdigits,
            lty=vhlty,col=vhcol,lwd=vhlwd);
     ## plot legend if desired
-    if (legend) pval_legend();
+    if (legend) pval_legend(x.scale=legend.xscale,y.scale=legend.yscale,cex=legend.cex);
   }
 ## plot histogram of (typically) d.sdz colored by pval
 ## sim is data frame of simulation results
@@ -127,7 +127,8 @@ plothist=
    vhline(vline=vline,hline=hline,vlab=vlab,hlab=hlab,vhdigits=vhdigits,
           lty=vhlty,col=vhcol,lwd=vhlwd);
     ## plot legend if desired
-    if (legend) pval_legend(x0=legend.x0);
+   if (legend)
+     pval_legend(x.scale=legend.xscale,y.scale=legend.yscale,x0=legend.x0,cex=legend.cex);
   }
 ## plot probability distributions vs. d colored by pval
 ## n is sample size (for converting d to t or pval)
@@ -198,10 +199,10 @@ plotpvsd=
     if (is.logical(fill.tail)&fill.tail) fill.tail=cq(upper,lower);
     if (!is.logical(fill.tail)) {
       if ('both' %in% fill.tail) fill.tail=cq(upper,lower);
-      sapply(fill.tail,function(tail) fill_tail(tail));
+      sapply(fill.tail,function(tail) fill_tail(tail,n,d,d0,d.crit));
     }
     ## plot legend if desired
-    if (legend) pval_legend();
+    if (legend) pval_legend(x.scale=legend.xscale,y.scale=legend.yscale,cex=legend.cex);
     }
 ## plot multiple lines - my adaptation of matplot - adapted from repwr/plotratm
 ## x is vector or matrix of x values
@@ -321,38 +322,36 @@ vline=
   }
 
 ## draw pval legend. works for big picture figure and probability plots
-pval_legend=
-  function(x.scale=parent(legend.xscale,1/8),y.scale=parent(legend.yscale,1/3),x0=NULL,
-           cex=parent(legend.cex,0.75)) {
-    param(brk.pval,col.pval,steps.pvcol,sig.level);
-    ## plt=par('usr');                       # plot region in user coordinates
-    ## names(plt)=cq(left,right,bottom,top);
-    xtkl=par('xaxp');                    # x tick locations
-    ytkl=par('yaxp');                    # y tick locations
-    names(xtkl)=names(ytkl)=cq(lo,hi,num);
-    if (is.null(x0)) x0=xtkl['lo'];
-    width=x.scale*(xtkl['hi']-x0);
-    x1=x0+width;
-    y1=ytkl['hi'];
-    height=y.scale*(y1-ytkl['lo']);
-    y0=y1-height;
-    ## image sometimes leaves blank space when y0 is between tick marks. roundoff problem, I think
-    ## works better to stretch y0 to next lower tick
-    tkl=seq(ytkl['lo'],y1,len=ytkl['num']+1);
-    y0=tkl[findInterval(y0,tkl)];
-    height=y1-y0;                         # adjust height for new y0
-    x=c(x0,x1);
-    y=seq(y0,y1,length.out=2*steps.pvcol+1)[1:(2*steps.pvcol)]
-    z=t(as.matrix(rev(head(brk.pval,-1))));
-    image(x,y,z,add=TRUE,breaks=brk.pval,col=col.pval);
-    ## add legend text
-    x1=x1+strwidth(' ',cex=cex);
-    text(x1,y0,0,adj=c(0,0),cex=cex)
-    text(x1,y0+height/2,sig.level,adj=c(0,0.5),cex=cex)
-    text(x1,y0+height,1,adj=c(0,1),cex=cex)
-    y1=y1+strheight('p-value',cex=cex);
-    text(x0+width/2,y1,"p-value",adj=c(0.5,0.5),cex=cex);
-  }
+pval_legend=function(x.scale,y.scale,x0=NULL,cex) {
+  param(brk.pval,col.pval,steps.pvcol,sig.level);
+  ## plt=par('usr');                       # plot region in user coordinates
+  ## names(plt)=cq(left,right,bottom,top);
+  xtkl=par('xaxp');                    # x tick locations
+  ytkl=par('yaxp');                    # y tick locations
+  names(xtkl)=names(ytkl)=cq(lo,hi,num);
+  if (is.null(x0)) x0=xtkl['lo'];
+  width=x.scale*(xtkl['hi']-x0);
+  x1=x0+width;
+  y1=ytkl['hi'];
+  height=y.scale*(y1-ytkl['lo']);
+  y0=y1-height;
+  ## image sometimes leaves blank space when y0 is between tick marks. roundoff problem, I think
+  ## works better to stretch y0 to next lower tick
+  tkl=seq(ytkl['lo'],y1,len=ytkl['num']+1);
+  y0=tkl[findInterval(y0,tkl)];
+  height=y1-y0;                         # adjust height for new y0
+  x=c(x0,x1);
+  y=seq(y0,y1,length.out=2*steps.pvcol+1)[1:(2*steps.pvcol)]
+  z=t(as.matrix(rev(head(brk.pval,-1))));
+  image(x,y,z,add=TRUE,breaks=brk.pval,col=col.pval);
+  ## add legend text
+  x1=x1+strwidth(' ',cex=cex);
+  text(x1,y0,0,adj=c(0,0),cex=cex)
+  text(x1,y0+height/2,sig.level,adj=c(0,0.5),cex=cex)
+  text(x1,y0+height,1,adj=c(0,1),cex=cex)
+  y1=y1+strheight('p-value',cex=cex);
+  text(x0+width/2,y1,"p-value",adj=c(0.5,0.5),cex=cex);
+}
 ## draw plotm legend. adapted from repwr/mess_legend
 plotm_legend=
   function(where=NULL,x=NULL,y=NULL,cex=0.8,bty='n',
@@ -366,8 +365,7 @@ plotm_legend=
 
 ## fill tail of probability density
 ## adapted from https://stackoverflow.com/questions/45527077. Thx!
-fill_tail=
-  function(tail=cq(upper,lower),n=parent(n),d=parent(d),d0=parent(d0),d.crit=parent(d.crit)) {
+fill_tail=function(tail=cq(upper,lower),n,d,d0,d.crit) {
   tail=match.arg(tail);
   x=if(tail=='upper') x=d[d>d.crit] else x=d[d<(-d.crit)]
   y=d_d2t(n,x,d0);
