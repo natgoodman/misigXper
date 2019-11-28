@@ -81,6 +81,94 @@ doc_confi=
     dofig(plotm_cover,figname,cover=cover,title=title);
     cover;
   }
+## figure 1 (some version...). histogram, d2t sampling distribution, ci's
+## legend tells whether to draw pval legend
+##   legend.x0 is harcoded x-position of legend - use with care!
+##   legend.xscale, legend.yscale are fractions of plat areas
+##   legend.cex is cex for legend text
+## col.d2t, etc are vectors: 1st elements for sig, 2nd for nonsig
+##   if NULL, col.d2t means color by pval
+## col.ci, lty.ci, lwd.ci are vectors: 1st elements for ci's that cover d0, 2nd ones that don't
+## Note: xlim, ylim often passed in ...
+plothist_ci=plothist_confx=
+  function(sim,n=sim$n[1],d.pop=sim$d.pop[1],conf.level=0.95,
+           p=seq(0.025,0.975,by=0.025),d=q_d2t(n=n,d0=d.pop,p=p),
+           title,xlab="observed effect size (Cohen's d)",ylab='probability density',
+           legend=T,legend.xscale=1/8,legend.yscale=1/3,legend.x0=NULL,legend.cex=0.75,
+           hist.col='grey90',border.col='grey80',
+           d2t.col=NULL,d2t.lty='solid',d2t.lwd=c(4,2),
+           ci.col=cq(green,grey50),ci.lty=cq(solid,dotted),ci.lwd=c(0.5,2),
+           ci.pch=19,ci.cex=c(0.5,0.75),ci.tol=1e-5,
+           vline=cq(d.pop,d.conf),
+           ...) {
+    d2t.lty=rep(d2t.lty,len=2); d2t.lwd=rep(d2t.lwd,len=2);
+    ci.col=rep(ci.col,len=2); ci.lty=rep(ci.lty,len=2); ci.lwd=rep(ci.lwd,len=2);
+    ci.pch=rep(ci.pch,len=2); ci.cex=rep(ci.cex,len=2);
+    
+    plothist(sim=sim,col=hist.col,border=border.col,title=title,xlab=xlab,ylab=ylab,legend=F,...);
+    plotpvsd(add=T,n=n,d0=d.pop,col=d2t.col,
+             lty.sig=d2t.lty[1],lty.nonsig=d2t.lty[2],lwd.sig=d2t.lwd[1],lwd.nonsig=d2t.lwd[2]);
+    if (legend)
+      pval_legend(x.scale=legend.xscale,y.scale=legend.yscale,x0=legend.x0,cex=legend.cex);
+    d.conf=d_conf(n=n,d0=d.pop,conf.level=conf.level);
+    ## if (missing(d)) {
+    ##   ## TODO: extend wings until density too low
+    ##   d.diff=diff(d.conf)/10;
+    ##   d=c(d.conf[1]-d.diff,seq(d.conf[1],d.conf[2],len=10),d.conf[2]+d.diff);
+    ## }
+    ci=ci_d2t(n=n,d=d,conf.level=conf.level);
+    y=d_d2t(n=n,d=d,d0=d.pop);
+    col=ifelse(between(d.pop,ci[1,],ci[2,],tol),ci.col[1],ci.col[2]);
+    lty=ifelse(between(d.pop,ci[1,],ci[2,],tol),ci.lty[1],ci.lty[2]);
+    lwd=ifelse(between(d.pop,ci[1,],ci[2,],tol),ci.lwd[1],ci.lwd[2]);
+    pch=ifelse(between(d.pop,ci[1,],ci[2,],tol),ci.pch[1],ci.pch[2]);
+    cex=ifelse(between(d.pop,ci[1,],ci[2,],tol),ci.cex[1],ci.cex[2]);
+    hline(y=y,x0=ci[1,],x=ci[2,],col=col,lty=lty,lwd=lwd);
+    points(d,y,col=col,pch=pch,cex=cex);
+    if ('d.pop' %in% vline) vhline(vline=d.pop,col='black',lty='solid');
+    if ('d.conf' %in% vline) vhline(vline=d.conf,col=ci.col[1],lty='dotted');
+  }
+d_conf=function(n,d0,simplify=T,conf.level=param(conf.level)) {
+  d.conf=d_conf_(n,d0,conf.level);
+  if (simplify&ncol(d.conf)==1) d.conf=as.vector(d.conf);
+  d.conf;
+}
+d_conf_=Vectorize(function(n,d0,conf.level) {
+  lo=uniroot(function(d) ci_d2t(n=n,d=d,conf.level=conf.level)[2]-d0,interval=c(-5,d0))$root;
+  hi=uniroot(function(d) ci_d2t(n=n,d=d,conf.level=conf.level)[1]-d0,interval=c(d0,5))$root;
+  c(lo,hi);
+})
+## figure 1 (some version...).
+## histogram, d2t sampling distribution (in grey), quantiles
+## Note: xlim, ylim often passed in ...
+plothist_q=
+  function(sim,n=sim$n[1],d.pop=sim$d.pop[1],quantile=c(0.5,0.8,0.95),
+           title,xlab="observed effect size (Cohen's d)",ylab='probability density',
+           ## legend=T,legend.xscale=1/8,legend.yscale=1/3,legend.x0=NULL,legend.cex=0.75,
+           hist.col='grey90',border.col='grey80',
+           distr.col='black',distr.lty='solid',distr.lwd=2,
+           q.col='black',q.lty='dotted',q.lwd=2,
+           dpop.col='black',dpop.lty='solid',dpop.lwd=1,
+           ...) {
+    plothist(sim=sim,col=hist.col,border=border.col,title=title,xlab=xlab,ylab=ylab,legend=F,...);
+    f=function(x) d_d2t(n,d=x,d0=d.pop);
+    curve(f,add=T,col=distr.col,lty=distr.lty,lwd=distr.lwd);
+    ## draw quantiles
+    p=(1-quantile)/2;
+    x=q_d2t(n=n,d0=d.pop,p=p,lower.tail=TRUE); y=d_d2t(n=n,d0=d.pop,d=x);
+    vline(x=x,y=y,col=q.col,lty=q.lty,lwd=q.lwd);
+    label=paste0(100*quantile,'% ');
+    text(x,y,label,col=q.col,lty=q.lty,lwd=q.lwd,cex=0.75,adj=c(1,0));
+    x=q_d2t(n=n,d0=d.pop,p=p,lower.tail=FALSE); y=d_d2t(n=n,d0=d.pop,d=x);
+    vline(x=x,y=y,col=q.col,lty=q.lty,lwd=q.lwd);
+    label=paste0(' ',100*quantile,'%');
+    text(x,y,label,col=q.col,lty=q.lty,lwd=q.lwd,cex=0.75,adj=c(0,0));
+    ## draw d.pop
+    ## vhline(vline=d.pop,col=dpop.col,lty=dpop.lty,lwd=dpop.lwd);
+  }
+
+
+
 ## wrapper for plotm to show coverage from simulated data
 plotm_cover=
   function(cover,title=NULL,smooth='aspline',
@@ -130,7 +218,7 @@ rm_sim=function(n,m,d0,id,i=NULL,subfiles=T) {
   file.remove(files);
 }
 ## consolidate sim subfiles, save as one file, rm subfiles
-cat_sim(n,m,d0,id) {
+cat_sim=function(n,m,d0,id) {
   sim=load_sim(n,m,d0,id,subfiles=T);
   save_sim(sim,n,m,d0,id);
   rm_sim(n,m,d0,id);
